@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7F77DD">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TongueTwist">
+<title>Tongue Twister Practice</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --purple-mid: #534AB7;
+    --teal-light: #E1F5EE;
+    --teal-dark: #085041;
+    --amber-light: #FAEEDA;
+    --amber-dark: #633806;
+    --red-light: #FCEBEB;
+    --red-dark: #791F1F;
+    --green-light: #EAF3DE;
+    --green-dark: #27500A;
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --text-hint: #999;
+    --border: rgba(0,0,0,0.12);
+    --surface: #f5f5f5;
+    --card: #ffffff;
+    --bg: #f0f0f8;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text: #f0f0f0;
+      --text-muted: #aaa;
+      --text-hint: #777;
+      --border: rgba(255,255,255,0.12);
+      --surface: #2a2a2a;
+      --card: #1e1e1e;
+      --bg: #131320;
+      --purple-light: #2a2860;
+      --purple-dark: #c8c4f8;
+    }
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .screen { display: none; min-height: 100vh; padding: 0 0 80px; }
+  .screen.active { display: block; }
+  .topbar {
+    background: var(--purple);
+    color: white;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar h1 { font-size: 18px; font-weight: 600; flex: 1; }
+  .topbar .back-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .content { padding: 16px; }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    text-decoration: none;
+    -webkit-user-select: none;
+  }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-primary { background: var(--purple); border-color: var(--purple); color: white; }
+  .btn-success { background: #639922; border-color: #639922; color: white; }
+  .btn-danger { background: #E24B4A; border-color: #E24B4A; color: white; }
+  .btn-outline-purple { background: var(--purple-light); border-color: var(--purple); color: var(--purple-dark); }
+  .btn-lg { padding: 14px 24px; font-size: 16px; border-radius: var(--radius); }
+  .btn-block { width: 100%; }
+  .btn:disabled { opacity: 0.5; pointer-events: none; }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-easy { background: var(--green-light); color: var(--green-dark); }
+  .badge-medium { background: var(--amber-light); color: var(--amber-dark); }
+  .badge-hard { background: var(--red-light); color: var(--red-dark); }
+  .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--purple); }
+  .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .progress-wrap { margin-bottom: 16px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .progress-bg { background: var(--surface); border-radius: 99px; height: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--purple); border-radius: 99px; transition: width 0.4s; }
+  .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--text);
+    transition: all 0.15s;
+  }
+  .filter-chip.active { background: var(--purple); border-color: var(--purple); color: white; }
+  .twister-item {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .twister-item:active { border-color: var(--purple); }
+  .check-circle {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .check-circle.done { background: var(--green-light); border-color: #639922; color: var(--green-dark); }
+  .twister-info { flex: 1; min-width: 0; }
+  .twister-text { font-size: 14px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .twister-tip { font-size: 12px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tab-bar { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 16px; }
+  .tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+  .waveform { display: flex; align-items: center; justify-content: center; gap: 4px; height: 48px; background: var(--surface); border-radius: var(--radius-sm); }
+  .waveform span { display: block; width: 5px; background: var(--purple); border-radius: 3px; transition: height 0.1s; opacity: 0.7; }
+  .speed-row { display: flex; align-items: center; gap: 10px; }
+  .speed-row label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+  .speed-row input[type=range] { flex: 1; accent-color: var(--purple); }
+  .speed-row span { font-size: 13px; font-weight: 500; color: var(--purple); min-width: 44px; }
+  .feedback-box { background: var(--purple-light); border-radius: var(--radius-sm); padding: 14px; font-size: 14px; line-height: 1.6; color: var(--text); }
+  .score-pill { display: inline-block; background: var(--purple); color: white; font-size: 15px; font-weight: 700; padding: 6px 16px; border-radius: 99px; margin-top: 8px; }
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .profile-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .profile-card:active { border-color: var(--purple); }
+  .profile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .profile-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .profile-age { font-size: 12px; color: var(--text-muted); }
+  .mini-stats { display: flex; gap: 8px; }
+  .mini-stat { flex: 1; background: var(--surface); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+  .mini-val { font-size: 15px; font-weight: 700; color: var(--purple); }
+  .mini-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; }
+  .color-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+  .color-swatch { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s; }
+  .color-swatch.selected { border-color: var(--purple); }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--purple); }
+  .rec-dot { width: 12px; height: 12px; border-radius: 50%; background: #888; display: inline-block; }
+  .rec-dot.active { background: #E24B4A; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .history-item { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 14px; margin-bottom: 10px; }
+  .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .history-date { font-size: 12px; color: var(--text-hint); }
+  .history-text { font-size: 14px; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+  .history-feedback { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .install-banner {
+    background: var(--purple-light);
+    border: 1.5px solid var(--purple);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .install-banner.show { display: block; }
+  .install-banner h3 { font-size: 14px; font-weight: 600; color: var(--purple-dark); margin-bottom: 4px; }
+  .install-banner p { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border-top: 0.5px solid var(--border);
+    display: none;
+    padding: 8px 0 env(safe-area-inset-bottom, 0px);
+    z-index: 20;
+  }
+  .bottom-nav.show { display: flex; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px; cursor: pointer; color: var(--text-muted); font-size: 11px; border: none; background: none; }
+  .nav-btn.active { color: var(--purple); }
+  .nav-icon { font-size: 22px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 4px 0 10px; }
+  .prac-twister-card { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 20px; margin-bottom: 16px; }
+  .prac-twister-text { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
+  .prac-tip { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .rec-controls { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="topbar">
+    <h1>🗣️ Tongue Twister</h1>
+  </div>
+  <div class="content">
+    <div id="install-banner" class="install-banner">
+      <h3>📲 Install this app</h3>
+      <p>Tap the button below to add to your home screen for quick access!</p>
+      <button class="btn btn-primary" onclick="installPWA()">Install app</button>
+    </div>
+    <p class="section-title">Players</p>
+    <div class="profile-grid" id="profile-grid"></div>
+    <button class="btn btn-outline-purple btn-block btn-lg" onclick="goTo('screen-add')">
+      + Add player
+    </button>
+  </div>
+</div>
+
+<!-- ADD PLAYER -->
+<div class="screen" id="screen-add">
+  <div class="topbar">
+    <button class="back-btn" onclick="goTo('screen-home')">&#8592;</button>
+    <h1>New player</h1>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" type="text" id="new-name" placeholder="e.g. Arya" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input class="form-input" type="number" id="new-age" placeholder="e.g. 7" min="3" max="18">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Avatar color</label>
+        <div class="color-picker" id="color-picker">
+          <div class="color-swatch selected" style="background:#EEEDFE" data-bg="#EEEDFE" data-fg="#3C3489" onclick="pickColor(this)"></div>
+          <div class="color-swatch" style="background:#E1F5EE" data-bg="#E1F5EE" data-fg="#085041" onclick="pickColor(this)"></div>
+          <div class="color-swatch" style="background:#FAEEDA" data-bg="#FAEEDA" data-fg="#633806" onclick="pickColor(this)"></div>
+          <div class="color-swatch" style="background:#FCEBEB" data-bg="#FCEBEB" data-fg="#791F1F" onclick="pickColor(this)"></div>
+          <div class="color-swatch" style="background:#E6F1FB" data-bg="#E6F1FB" data-fg="#0C447C" onclick="pickColor(this)"></div>
+          <div class="color-swatch" style="background:#F4C0D1" data-bg="#F4C0D1" data-fg="#72243E" onclick="pickColor(this)"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" onclick="saveProfile()">Create player</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="screen-dashboard">
+  <div class="topbar" id="dash-topbar">
+    <button class="back-btn" onclick="goTo('screen-home')">&#8592;</button>
+    <div id="dash-avatar-sm" class="avatar" style="width:36px;height:36px;font-size:14px;background:#EEEDFE;color:#3C3489">OO</div>
+    <h1 id="dash-title">Player</h1>
+    <button class="back-btn" onclick="confirmDelete()" style="font-size:14px">🗑️</button>
+  </div>
+  <div class="content">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="stat-done">0</div><div class="stat-lbl">Practiced</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-avg">—</div><div class="stat-lbl">Avg score</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-streak">0</div><div class="stat-lbl">🔥 Streak</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Overall progress</span><span id="prog-pct">0%</span></div>
+      <div class="progress-bg"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" id="tab-btn-practice" onclick="switchTab('practice')">Practice</div>
+      <div class="tab" id="tab-btn-history" onclick="switchTab('history')">History</div>
+    </div>
+    <div id="tab-practice">
+      <div class="filter-row">
+        <div class="filter-chip active" id="chip-all" onclick="setFilter('all',this)">All 50</div>
+        <div class="filter-chip" id="chip-easy" onclick="setFilter('easy',this)">Easy</div>
+        <div class="filter-chip" id="chip-medium" onclick="setFilter('medium',this)">Medium</div>
+        <div class="filter-chip" id="chip-hard" onclick="setFilter('hard',this)">Hard</div>
+      </div>
+      <div id="twister-list"></div>
+    </div>
+    <div id="tab-history" style="display:none">
+      <div id="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRACTICE -->
+<div class="screen" id="screen-practice">
+  <div class="topbar">
+    <button class="back-btn" onclick="leavePractice()">&#8592;</button>
+    <h1>Practice</h1>
+    <span class="badge" id="prac-badge" style="margin-left:auto">Easy</span>
+    <span style="font-size:13px;color:rgba(255,255,255,0.8);margin-left:8px" id="prac-num">#1</span>
+  </div>
+  <div class="content">
+    <div class="prac-twister-card">
+      <div class="prac-twister-text" id="prac-text"></div>
+      <div class="prac-tip" id="prac-tip"></div>
+    </div>
+
+    <p class="section-title">Step 1 — Listen first</p>
+    <div class="card">
+      <div class="speed-row" style="margin-bottom:12px">
+        <label>Speed</label>
+        <input type="range" min="1" max="3" step="1" value="2" id="speed-sl" oninput="updateSpeed(this.value)">
+        <span id="speed-lbl">Normal</span>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="listenTwister()" id="btn-listen">
+        🔊 Listen
+      </button>
+    </div>
+
+    <p class="section-title">Step 2 — Record yourself</p>
+    <div class="card">
+      <div class="waveform" id="waveform" style="margin-bottom:12px">
+        <span style="height:8px"></span><span style="height:14px"></span><span style="height:10px"></span><span style="height:20px"></span><span style="height:12px"></span><span style="height:24px"></span><span style="height:16px"></span><span style="height:10px"></span><span style="height:18px"></span><span style="height:8px"></span><span style="height:14px"></span><span style="height:28px"></span>
+      </div>
+      <div class="rec-controls">
+        <button class="btn btn-danger" id="btn-rec" onclick="startRec()">
+          <span class="rec-dot" id="rec-dot"></span> Record
+        </button>
+        <button class="btn" id="btn-stop" style="display:none" onclick="stopRec()">⏹ Stop</button>
+        <button class="btn" id="btn-play-rec" style="display:none" onclick="playRec()">▶️ Play back</button>
+      </div>
+    </div>
+
+    <div id="ai-section" style="display:none">
+      <p class="section-title">Step 3 — Get feedback</p>
+      <div id="feedback-area" style="display:none;margin-bottom:12px">
+        <div class="feedback-box" id="feedback-content"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline-purple" id="btn-feedback" onclick="getAIFeedback()">✨ AI feedback</button>
+        <button class="btn btn-success" id="btn-done" onclick="markDone()">✅ Mark done</button>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <button class="btn btn-block" onclick="nextTwister()" style="font-size:15px">Next twister →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TWISTERS = [
+  {text:"She sells seashells by the seashore.",tip:"Focus on 's' vs 'sh' sounds.",level:"easy"},
+  {text:"Peter Piper picked a peck of pickled peppers.",tip:"Great for the 'p' sound.",level:"easy"},
+  {text:"How much wood would a woodchuck chuck?",tip:"Practice 'w' and 'ch' sounds.",level:"easy"},
+  {text:"Betty Botter bought some butter.",tip:"Excellent for the 'b' sound.",level:"easy"},
+  {text:"I scream, you scream, we all scream for ice cream.",tip:"Fun rhyming rhythm.",level:"easy"},
+  {text:"Red lorry, yellow lorry.",tip:"Repeat 5x fast for best effect.",level:"easy"},
+  {text:"Toy boat. Toy boat. Toy boat.",tip:"Sounds silly but trips up fast speakers.",level:"easy"},
+  {text:"Unique New York, unique New York.",tip:"Trains the 'ny' and 'k' sounds.",level:"easy"},
+  {text:"A proper copper coffee pot.",tip:"Practice 'p', 'c', 'f' clusters.",level:"easy"},
+  {text:"Six slippery snails slid slowly seaward.",tip:"Great for 's' and 'sl' clusters.",level:"easy"},
+  {text:"Fuzzy Wuzzy was a bear.",tip:"Fun 'w' and 'z' sound practice.",level:"easy"},
+  {text:"Zebras zig and zebras zag.",tip:"Fun 'z' starter for young kids.",level:"easy"},
+  {text:"Rubber baby buggy bumpers.",tip:"Classic 'b' and 'r' workout.",level:"medium"},
+  {text:"Black background, brown background.",tip:"Tricky 'bl' and 'br' blends.",level:"medium"},
+  {text:"Fresh French fried fish.",tip:"Master 'fr' and 'sh' together.",level:"medium"},
+  {text:"A big black bug bit a big black bear.",tip:"Focus on 'b' and 'bl' alternation.",level:"medium"},
+  {text:"Can you can a can as a canner can can a can?",tip:"Word-meaning shift with rhythm.",level:"medium"},
+  {text:"Lesser leather never weathered wetter weather better.",tip:"Trains 'l', 'w', and 'th' sounds.",level:"medium"},
+  {text:"Selfish shellfish.",tip:"Two-word twisters hit hard. Repeat 10x.",level:"medium"},
+  {text:"Three free throws.",tip:"Great for 'thr' cluster articulation.",level:"medium"},
+  {text:"Fred fed Ted bread and Ted fed Fred bread.",tip:"Reversal structure—focus on clarity.",level:"medium"},
+  {text:"The sixth sick sheik's sixth sheep's sick.",tip:"'s', 'sh', 'x' all at once.",level:"medium"},
+  {text:"Which witch switched the Swiss wristwatches?",tip:"Excellent 'w', 'sw', and 'ch' workout.",level:"medium"},
+  {text:"She sees cheese.",tip:"Short but sneaky—say it 10x fast.",level:"medium"},
+  {text:"Blue bluebird, black blackbird.",tip:"Challenges 'bl' + color pairs.",level:"medium"},
+  {text:"A skunk sat on a stump. The stump thunk the skunk stunk.",tip:"'sk', 'st', 'th' consonant clusters.",level:"medium"},
+  {text:"Mix a box of mixed biscuits.",tip:"Focus on 'ks' and 'x' endings.",level:"medium"},
+  {text:"If two witches watched two watches, which witch would watch which watch?",tip:"Great for listening and tracking too.",level:"medium"},
+  {text:"Brisk brave brigadiers brandished broad bright blades.",tip:"Advanced 'br' and 'bl' workout.",level:"hard"},
+  {text:"How can a clam cram in a clean cream can?",tip:"'cl', 'cr', 'n' endings—rapid fire.",level:"hard"},
+  {text:"Nine nimble noblemen nibbled nuts.",tip:"Trains 'n' and 'bl' across syllables.",level:"hard"},
+  {text:"He threw three free throws.",tip:"Sounds easy—try it 5x fast.",level:"hard"},
+  {text:"I thought a thought, but the thought I thought wasn't the thought I thought I thought.",tip:"'th' sound marathon.",level:"hard"},
+  {text:"The thirty-three thieves thought that they thrilled the throne throughout Thursday.",tip:"Pure 'th' domination.",level:"hard"},
+  {text:"Swan swam over the sea, swim swan swim.",tip:"'sw' + 'sw' rapid switching.",level:"hard"},
+  {text:"Truly rural, truly rural, truly rural.",tip:"Two words. Impossible. Try it.",level:"hard"},
+  {text:"Whether the weather is warm, whether the weather is hot, we have to put up with the weather whether we like it or not.",tip:"Long 'wh/w' sequence with breath control.",level:"hard"},
+  {text:"Seven slick slippery slimy snakes slowly sliding southward.",tip:"Alliteration-heavy 's' and 'sl' drill.",level:"hard"},
+  {text:"A tutor who tooted a flute tried to tutor two tooters to toot.",tip:"'t' and 'oo' vowel combinations.",level:"hard"},
+  {text:"The Irish wristwatch, the Swiss wristwatch.",tip:"Consonant clusters that feel impossible.",level:"hard"},
+  {text:"Three grey geese in the green grass grazing.",tip:"'gr', 'g', and long vowels together.",level:"hard"},
+  {text:"I wish to wash my Irish wristwatch.",tip:"'w', 'sh', 'r' battle each other.",level:"hard"},
+  {text:"Crisp crusts crackle and crunch.",tip:"Dense 'cr' clusters.",level:"hard"},
+  {text:"A noisy noise annoys an oyster.",tip:"Tricky 'oy' and 'oi' vowel workout.",level:"hard"},
+  {text:"The bottom of the butter bucket is the buttered bucket bottom.",tip:"'b', 'tt', 'ck' rhythm challenge.",level:"hard"},
+  {text:"I slit a sheet, a sheet I slit, upon the slitted sheet I sit.",tip:"Fast 'sl', 'sh', 'st' switching.",level:"hard"},
+  {text:"How much ground would a groundhog hog if a groundhog could hog ground?",tip:"Harder woodchuck variation.",level:"hard"},
+  {text:"If you notice this notice, you will notice that this notice is not worth noticing.",tip:"Repeated words at speed.",level:"hard"},
+  {text:"Chester cheetah chews a chunk of cheap cheddar cheese.",tip:"'ch' sound mastery drill.",level:"hard"},
+  {text:"Lesser leather never weathered wetter weather better.",tip:"'l', 'w', 'th' across syllables.",level:"hard"},
+];
+
+// Safe storage — falls back to in-memory if localStorage is blocked
+const store = (() => {
+  try { localStorage.setItem('_tt_test','1'); localStorage.removeItem('_tt_test'); return localStorage; }
+  catch(e) { const m = {}; return { getItem: k => m[k]||null, setItem: (k,v) => { m[k]=v; } }; }
+})();
+
+let profiles = JSON.parse(store.getItem('tt_profiles2') || '[]');
+let curProfileIdx = null;
+let curFilter = 'all';
+let curTwisterIdx = 0;
+let mediaRec = null;
+let audioChunks = [];
+let recBlob = null;
+let recURL = null;
+let waveInt = null;
+let spRate = 0.9;
+let deferredPrompt = null;
+
+function save() { try { store.setItem('tt_profiles2', JSON.stringify(profiles)); } catch(e) {} }
+function initials(n) { return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const res = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').classList.remove('show');
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'screen-home') renderHome();
+}
+
+function renderHome() {
+  const grid = document.getElementById('profile-grid');
+  if (!profiles.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1" class="empty-state"><div class="empty-icon">🧒</div><div class="empty-text">No players yet.<br>Add your first player!</div></div>`;
+    return;
+  }
+  grid.innerHTML = profiles.map((p,i) => {
+    const hist = p.history || [];
+    const done = hist.length;
+    const scores = hist.filter(h=>h.score).map(h=>h.score);
+    const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
+    return `<div class="profile-card" onclick="openDash(${i})">
+      <div class="profile-top">
+        <div class="avatar" style="width:44px;height:44px;font-size:16px;background:${p.bg};color:${p.fg}">${initials(p.name)}</div>
+        <div><div class="profile-name">${p.name}</div><div class="profile-age">Age ${p.age}</div></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat"><div class="mini-val">${done}</div><div class="mini-lbl">done</div></div>
+        <div class="mini-stat"><div class="mini-val">${avg !== null ? avg+'%' : '—'}</div><div class="mini-lbl">avg</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let selBg = '#EEEDFE', selFg = '#3C3489';
+function pickColor(el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selBg = el.dataset.bg; selFg = el.dataset.fg;
+}
+
+function saveProfile() {
+  const name = document.getElementById('new-name').value.trim();
+  const age = parseInt(document.getElementById('new-age').value) || 7;
+  if (!name) { alert('Please enter a name.'); return; }
+  profiles.push({ name, age, bg: selBg, fg: selFg, history: [], completed: [] });
+  save();
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-age').value = '';
+  goTo('screen-home');
+}
+
+function confirmDelete() {
+  if (confirm(`Remove ${profiles[curProfileIdx].name} and all their data?`)) {
+    profiles.splice(curProfileIdx, 1);
+    save();
+    goTo('screen-home');
+  }
+}
+
+function openDash(idx) {
+  curProfileIdx = idx;
+  curFilter = 'all';
+  const p = profiles[idx];
+  document.getElementById('dash-avatar-sm').style.background = p.bg;
+  document.getElementById('dash-avatar-sm').style.color = p.fg;
+  document.getElementById('dash-avatar-sm').textContent = initials(p.name);
+  document.getElementById('dash-title').textContent = p.name;
+  updateStats();
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.getElementById('tab-practice').style.display = 'block';
+  document.getElementById('tab-history').style.display = 'none';
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('chip-all').classList.add('active');
+  renderList();
+  goTo('screen-dashboard');
+}
+
+function updateStats() {
+  const p = profiles[curProfileIdx];
+  const hist = p.history || [];
+  const scores = hist.filter(h=>h.score).map(h=>h.score);
+  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
+  document.getElementById('stat-done').textContent = hist.length;
+  document.getElementById('stat-avg').textContent = avg !== null ? avg+'%' : '—';
+  document.getElementById('stat-streak').textContent = calcStreak(hist);
+  const pct = Math.round(((p.completed||[]).length / TWISTERS.length) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function calcStreak(hist) {
+  if (!hist.length) return 0;
+  const days = [...new Set(hist.map(h => new Date(h.ts).toDateString()))];
+  let s = 0, d = new Date();
+  for (let i = 0; i < 30; i++) {
+    if (days.includes(d.toDateString())) s++;
+    else if (i > 0) break;
+    d.setDate(d.getDate()-1);
+  }
+  return s;
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-btn-practice').classList.toggle('active', tab==='practice');
+  document.getElementById('tab-btn-history').classList.toggle('active', tab==='history');
+  document.getElementById('tab-practice').style.display = tab==='practice' ? 'block' : 'none';
+  document.getElementById('tab-history').style.display = tab==='history' ? 'block' : 'none';
+  if (tab === 'history') renderHistory();
+}
+
+function setFilter(f, el) {
+  curFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const p = profiles[curProfileIdx];
+  const done = p.completed || [];
+  const list = TWISTERS.map((t,i) => ({...t,idx:i})).filter(t => curFilter==='all' || t.level===curFilter);
+  document.getElementById('twister-list').innerHTML = list.map(t => `
+    <div class="twister-item" onclick="openPractice(${t.idx})">
+      <div class="check-circle ${done.includes(t.idx)?'done'}">${done.includes(t.idx)?'✓':''}</div>
+      <div class="twister-info">
+        <div class="twister-text">${t.text}</div>
+        <div class="twister-tip">${t.tip}</div>
+      </div>
+      <span class="badge badge-${t.level}">${t.level.charAt(0).toUpperCase()+t.level.slice(1)}</span>
+    </div>`).join('');
+}
+
+function renderHistory() {
+  const p = profiles[curProfileIdx];
+  const hist = [...(p.history||[])].reverse().slice(0,30);
+  if (!hist.length) {
+    document.getElementById('history-list').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No sessions yet.<br>Start practicing!</div></div>`;
+    return;
+  }
+  document.getElementById('history-list').innerHTML = hist.map(h => {
+    const t = TWISTERS[h.idx];
+    const d = new Date(h.ts);
+    return `<div class="history-item">
+      <div class="history-header">
+        <span class="badge badge-${t.level}">${t.level}</span>
+        ${h.score ? `<span class="score-pill" style="font-size:12px;padding:3px 10px">${h.score}%</span>` : ''}
+        <span class="history-date">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div class="history-text">${t.text}</div>
+      ${h.feedback ? `<div class="history-feedback">${h.feedback}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openPractice(idx) {
+  curTwisterIdx = idx;
+  recBlob = null; recURL = null;
+  document.getElementById('btn-play-rec').style.display = 'none';
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('ai-section').style.display = 'none';
+  document.getElementById('feedback-area').style.display = 'none';
+  document.getElementById('rec-dot').classList.remove('active');
+  document.getElementById('btn-rec').style.display = 'inline-flex';
+  resetWave();
+  const t = TWISTERS[idx];
+  document.getElementById('prac-text').textContent = t.text;
+  document.getElementById('prac-tip').textContent = '💡 ' + t.tip;
+  document.getElementById('prac-num').textContent = '#' + (idx+1) + ' / 50';
+  const badge = document.getElementById('prac-badge');
+  badge.textContent = t.level.charAt(0).toUpperCase() + t.level.slice(1);
+  badge.className = 'badge badge-' + t.level;
+  goTo('screen-practice');
+}
+
+function leavePractice() {
+  if (mediaRec && mediaRec.state !== 'inactive') { mediaRec.stop(); mediaRec.stream.getTracks().forEach(t=>t.stop()); }
+  clearInterval(waveInt);
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  goTo('screen-dashboard');
+  updateStats();
+  renderList();
+}
+
+function updateSpeed(v) {
+  spRate = [0.6, 0.9, 1.25][v-1];
+  document.getElementById('speed-lbl').textContent = ['Slow','Normal','Fast'][v-1];
+}
+
+function listenTwister() {
+  if (!window.speechSynthesis) { alert('Text-to-speech not available.'); return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(TWISTERS[curTwisterIdx].text);
+  utt.rate = spRate;
+  window.speechSynthesis.speak(utt);
+}
+
+async function startRec() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Microphone not supported in this browser. Use Chrome on Android.'); return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    mediaRec = new MediaRecorder(stream, { mimeType });
+    mediaRec.ondataavailable = e => audioChunks.push(e.data);
+    mediaRec.onstop = () => {
+      recBlob = new Blob(audioChunks, { type: mediaRec.mimeType });
+      recURL = URL.createObjectURL(recBlob);
+      document.getElementById('btn-play-rec').style.display = 'inline-flex';
+      document.getElementById('ai-section').style.display = 'block';
+      stopWave();
+    };
+    mediaRec.start();
+    document.getElementById('btn-rec').style.display = 'none';
+    document.getElementById('btn-stop').style.display = 'inline-flex';
+    document.getElementById('rec-dot').classList.add('active');
+    startWave();
+  } catch(e) {
+    alert('Microphone permission required. Please allow access in your browser settings.');
+  }
+}
+
+function stopRec() {
+  if (mediaRec && mediaRec.state !== 'inactive') {
+    mediaRec.stop();
+    mediaRec.stream.getTracks().forEach(t => t.stop());
+  }
+  document.getElementById('btn-rec').style.display = 'inline-flex';
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('rec-dot').classList.remove('active');
+  stopWave();
+}
+
+function playRec() {
+  if (!recURL) return;
+  new Audio(recURL).play();
+}
+
+function startWave() {
+  const bars = document.querySelectorAll('#waveform span');
+  waveInt = setInterval(() => bars.forEach(b => b.style.height = Math.round(6 + Math.random()*28)+'px'), 100);
+}
+
+function stopWave() { clearInterval(waveInt); resetWave(); }
+function resetWave() {
+  const h = [8,14,10,20,12,24,16,10,18,8,14,28];
+  document.querySelectorAll('#waveform span').forEach((b,i) => b.style.height = h[i]+'px');
+}
+
+async function getAIFeedback() {
+  const t = TWISTERS[curTwisterIdx];
+  const p = profiles[curProfileIdx];
+  const btn = document.getElementById('btn-feedback');
+  btn.textContent = '⏳ Thinking...';
+  btn.disabled = true;
+  document.getElementById('feedback-area').style.display = 'block';
+  document.getElementById('feedback-content').innerHTML = '<em style="color:#888">Getting AI coaching...</em>';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content:
+          `A ${p.age}-year-old child just practiced this tongue twister: "${t.text}"\n\nTip: ${t.tip}\nDifficulty: ${t.level}\n\nGive short, warm, encouraging coaching feedback. Include:\n1. One motivating sentence\n2. The key sounds to focus on\n3. One practical improvement tip\n4. A score out of 100 (format exactly: SCORE:XX)\n\nMax 80 words. Be age-appropriate for ${p.age} years old. Be playful and fun!` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(c => c.text||'').join('');
+    const match = text.match(/SCORE:(\d+)/);
+    const score = match ? parseInt(match[1]) : null;
+    const clean = text.replace(/SCORE:\d+/,'').trim();
+    document.getElementById('feedback-content').innerHTML =
+      `<div style="margin-bottom:8px">${clean}</div>${score!==null?`<span class="score-pill">${score} / 100</span>`:''}`;
+    if (!p.history) p.history = [];
+    p.history.push({ idx: curTwisterIdx, ts: Date.now(), score, feedback: clean });
+    save();
+    updateStats();
+  } catch(e) {
+    document.getElementById('feedback-content').innerHTML = '<span style="color:#E24B4A">Could not reach AI. Check internet and try again.</span>';
+  }
+  btn.innerHTML = '✨ AI feedback';
+  btn.disabled = false;
+}
+
+function markDone() {
+  const p = profiles[curProfileIdx];
+  if (!p.completed) p.completed = [];
+  if (!p.completed.includes(curTwisterIdx)) p.completed.push(curTwisterIdx);
+  if (!p.history) p.history = [];
+  const recent = p.history.find(h => h.idx===curTwisterIdx && Date.now()-h.ts < 10000);
+  if (!recent) p.history.push({ idx: curTwisterIdx, ts: Date.now() });
+  save();
+  updateStats();
+  nextTwister();
+}
+
+function nextTwister() {
+  openPractice((curTwisterIdx + 1) % TWISTERS.length);
+}
+
+renderHome();
+</script>
+</body>
+</html>
